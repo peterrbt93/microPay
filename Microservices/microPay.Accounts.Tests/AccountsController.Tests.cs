@@ -196,6 +196,91 @@ namespace microPay.Accounts.Tests
         }
     }
 
+    [TestFixture]
+    public class AccountsController_Deposit
+    {
+
+        [SetUp]
+        public void SetUp()
+        {
+        }
+
+        [Test]
+        public async Task Deposit_True_On_Success()
+        {
+            //Arrange
+            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            {
+                Username = "USER",
+                Amount = 5.0
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.Deposit(accChangeRequest))
+                .ReturnAsync(true);
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var result = await _controller.Deposit(accChangeRequest);
+
+            //Assert
+            Assert.That(result != null, "Create response is not null");
+            Assert.That(result.StatusCode == HttpStatusCode.OK, "Deposit successful");
+            Assert.That(result.Value != null);
+            Assert.That(result.Value == "Success");
+        }
+
+
+        [Test]
+        public async Task Deposit_Should_Return_400_On_Invalid_Input()
+        {
+            //Arrange
+            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            {
+                Username = "",
+                Amount = "NAN"
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.Deposit(accChangeRequest))
+                .ReturnAsync(false);
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var result = await _controller.Deposit(accChangeRequest);
+
+            //Assert
+            Assert.That(result != null, "Create response is not null");
+            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Deposit failed - Error in request");
+            Assert.That(result.Value != null);
+            Assert.That(result.Value == "Invalid Input");
+        }
+
+        public async Task Deposit_False_On_Fail()
+        {
+            //Arrange
+            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            {
+                Username = "USER",
+                Amount = 5.0
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.Deposit(accChangeRequest))
+                .ReturnAsync(false);
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var result = await _controller.Deposit(accChangeRequest);
+
+            //Assert
+            Assert.That(result != null, "Create response is not null");
+            Assert.That(result.StatusCode == HttpStatusCode.UnprocessableContent, "Deposit fail results in code 422");
+            Assert.That(result.Value != null);
+            Assert.That(result.Value == "An error occurred during withdraw");
+        }
+    }
+
         }
     }
 }
