@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microservices", "Microservices", "{A434A0C5-49E3-419E-8055-5C3A0DA2371A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Gateway", "microPay.Gateway\microPay.Gateway.csproj", "{6D026D86-6C9B-4263-92EF-E2185273B822}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Accounts", "Microservices\microPay.Accounts\microPay.Accounts.csproj", "{3E5D5AE6-5171-460F-BEC6-3488CBB0F1E6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Transactions", "Microservices\microPay.Transactions\microPay.Transactions.csproj", "{41618F5E-B212-49A6-87F1-2622337DA9C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "microPay.Accounts.Tests", "Microservices\microPay.Accounts.Tests\microPay.Accounts.Tests.csproj", "{872341A0-A8E1-4A89-A363-EEFA83C4A931}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "microPay.Transactions.Tests", "Microservices\microPay.Transactions.Tests\microPay.Transactions.Tests.csproj", "{B83FC376-50BC-41D6-940C-552F45C50A92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D026D86-6C9B-4263-92EF-E2185273B822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D026D86-6C9B-4263-92EF-E2185273B822}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D026D86-6C9B-4263-92EF-E2185273B822}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D026D86-6C9B-4263-92EF-E2185273B822}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E5D5AE6-5171-460F-BEC6-3488CBB0F1E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E5D5AE6-5171-460F-BEC6-3488CBB0F1E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E5D5AE6-5171-460F-BEC6-3488CBB0F1E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E5D5AE6-5171-460F-BEC6-3488CBB0F1E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41618F5E-B212-49A6-87F1-2622337DA9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41618F5E-B212-49A6-87F1-2622337DA9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41618F5E-B212-49A6-87F1-2622337DA9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41618F5E-B212-49A6-87F1-2622337DA9C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{872341A0-A8E1-4A89-A363-EEFA83C4A931}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{872341A0-A8E1-4A89-A363-EEFA83C4A931}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{872341A0-A8E1-4A89-A363-EEFA83C4A931}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{872341A0-A8E1-4A89-A363-EEFA83C4A931}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B83FC376-50BC-41D6-940C-552F45C50A92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B83FC376-50BC-41D6-940C-552F45C50A92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B83FC376-50BC-41D6-940C-552F45C50A92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B83FC376-50BC-41D6-940C-552F45C50A92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E5D5AE6-5171-460F-BEC6-3488CBB0F1E6} = {A434A0C5-49E3-419E-8055-5C3A0DA2371A}
+		{41618F5E-B212-49A6-87F1-2622337DA9C7} = {A434A0C5-49E3-419E-8055-5C3A0DA2371A}
+		{872341A0-A8E1-4A89-A363-EEFA83C4A931} = {A434A0C5-49E3-419E-8055-5C3A0DA2371A}
+		{B83FC376-50BC-41D6-940C-552F45C50A92} = {A434A0C5-49E3-419E-8055-5C3A0DA2371A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D744C942-43C0-4759-A240-EDD2EA531C43}
+	EndGlobalSection
+EndGlobal
