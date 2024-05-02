@@ -116,6 +116,86 @@ namespace microPay.Accounts.Tests
             Assert.That(result.StatusCode == HttpStatusCode.Conflict, "Account create user exists results in code 409");
         }
     }
+
+    [TestFixture]
+    public class AccountsController_GetBalanceByUsername
+    {
+
+        [SetUp]
+        public void SetUp()
+        {
+        }
+
+        [Test]
+        public async Task GetBalanceByUsername_On_Success()
+        {
+            //Arrange
+            string accountToGet = "USER";
+            AccountDTO expectedResult = new AccountDTO()
+            {
+                Username = "USER",
+                Password = "password",
+                Balance = 3.0,
+                CanOverdraft = 1
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.GetBalanceByUsername(accountToGet))
+                .ReturnAsync(expectedResult);
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var result = await _controller.GetBalanceByUsername(accountToGet);
+
+            //Assert
+            Assert.That(result != null, "Create response is not null");
+            Assert.That(result.StatusCode == HttpStatusCode.OK, "Account retrieved");
+            Assert.That(result.Value != null);
+            Assert.That(result.Value.Username == "USER");
+            Assert.That(result.Value.Balance == 3.0);
+
+        }
+
+
+        [Test]
+        public async Task GetBalanceByUsername_Should_Return_400_On_Invalid_Input()
+        {
+            //Arrange
+            string accountToGet = "";
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.GetBalanceByUsername(accountToGet))
+                .ReturnAsync(null);
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var result = await _controller.GetBalanceByUsername(accountToGet);
+
+            //Assert
+            Assert.That(result != null, "Create response is not null");
+            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Invalid request");
+        }
+
+        public async Task GetBalanceByUsername_Message_If_User_Does_Not_Exist()
+        {
+            //Arrange
+            string accountToGet = "NOTEXIST";
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.GetBalanceByUsername(accountToGet))
+                .ReturnAsync(null);
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var result = await _controller.GetBalanceByUsername(accountToGet);
+
+            //Assert
+            Assert.That(result != null, "Create response is not null");
+            Assert.That(result.StatusCode == HttpStatusCode.OK, "Account retrieved");
+            Assert.That(result.Value.Username == "User does not exist");
+        }
+    }
+
         }
     }
 }
