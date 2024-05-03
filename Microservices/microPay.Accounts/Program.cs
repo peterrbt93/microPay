@@ -1,4 +1,5 @@
 using microPay.Accounts.Entities;
+using microPay.Accounts.Services;
 using Microsoft.EntityFrameworkCore;
 using MySql.EntityFrameworkCore.Extensions;
 
@@ -19,6 +20,9 @@ builder.Services.AddEntityFrameworkMySQL().AddDbContext<AccountsContext>(options
     }
     
 });
+
+//Inject dependency for interface
+builder.Services.AddScoped<IAccountsService, AccountsService>();
 
 var app = builder.Build();
 

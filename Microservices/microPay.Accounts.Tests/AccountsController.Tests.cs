@@ -1,5 +1,8 @@
+using Google.Protobuf.WellKnownTypes;
 using microPay.Accounts.Controllers;
 using microPay.Accounts.Entities;
+using microPay.Accounts.Services;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -30,15 +33,17 @@ namespace microPay.Accounts.Tests
             var mockService = new Mock<IAccountsService>();
             mockService
                 .Setup(m => m.CreateAccount(accountToCreate))
-                .ReturnAsync(accountToCreate);
+                .ReturnsAsync(true);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountToCreate);
+            var result = response as ObjectResult;
 
             //Assert
             Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.Created, "Account created");
+            Assert.That(result?.StatusCode == 201, "Account created status 201");
+            Assert.That((bool?)(result?.Value), Is.EqualTo(true), "Account created");
         }
 
         [Test]
@@ -55,15 +60,17 @@ namespace microPay.Accounts.Tests
             var mockService = new Mock<IAccountsService>();
             mockService
                 .Setup(m => m.CreateAccount(accountToCreate))
-                .ReturnAsync(null);
+                .ReturnsAsync(false);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountToCreate);
+            var result = response as ObjectResult;
 
             //Assert
             Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.UnprocessableContent, "Account create fail results in code 422");
+            Assert.That(result?.StatusCode == 422, "Account create fail results in code 422");
+            Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
         }
 
 
@@ -75,23 +82,26 @@ namespace microPay.Accounts.Tests
             {
                 Username = "",
                 Password = "password",
-                Balance = null,
-                CanOverdraft = "String"
+                Balance = 0.0,
+                CanOverdraft = 1
             };
             var mockService = new Mock<IAccountsService>();
             mockService
                 .Setup(m => m.CreateAccount(accountToCreate))
-                .ReturnAsync(null);
+                .ReturnsAsync(false);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountToCreate);
+            var result = response as ObjectResult;
 
             //Assert
             Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Account create invalid input results in code 400");
+            Assert.That(result?.StatusCode == 400, "Account create invalid input results in code 400");
+            Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
         }
 
+        [Test]
         public async Task CreateAccount_Should_Return_409_When_Account_Already_Exists()
         {
             //Arrange
@@ -109,11 +119,13 @@ namespace microPay.Accounts.Tests
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountToCreate);
+            var result = response as ObjectResult;
 
             //Assert
             Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.Conflict, "Account create user exists results in code 409");
+            Assert.That(result?.StatusCode == 409, "Account create user exists results in code 409");
+            Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
         }
     }
 
@@ -131,29 +143,27 @@ namespace microPay.Accounts.Tests
         {
             //Arrange
             string accountToGet = "USER";
-            AccountDTO expectedResult = new AccountDTO()
+            AccountAmount expectedResult = new AccountAmount()
             {
-                Username = "USER",
-                Password = "password",
-                Balance = 3.0,
-                CanOverdraft = 1
+                Username = accountToGet,
+                Amount = 2.0
             };
             var mockService = new Mock<IAccountsService>();
             mockService
                 .Setup(m => m.GetBalanceByUsername(accountToGet))
-                .ReturnAsync(expectedResult);
+                .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.GetBalanceByUsername(accountToGet);
+            var response = await _controller.GetBalanceByUsername(accountToGet);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.OK, "Account retrieved");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value.Username == "USER");
-            Assert.That(result.Value.Balance == 3.0);
-
+            Assert.That(result != null, "Balance response is not null");
+            Assert.That(result?.StatusCode == 200, "Balance retrieved");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo(accountToGet), "Balance value correct");
         }
 
 
@@ -162,37 +172,79 @@ namespace microPay.Accounts.Tests
         {
             //Arrange
             string accountToGet = "";
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = accountToGet,
+                Amount = 2.0
+            };
             var mockService = new Mock<IAccountsService>();
             mockService
                 .Setup(m => m.GetBalanceByUsername(accountToGet))
-                .ReturnAsync(null);
+                .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.GetBalanceByUsername(accountToGet);
+            var response = await _controller.GetBalanceByUsername(accountToGet);
+            var result = response as ObjectResult;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Invalid request");
+            Assert.That(result != null, "Balance response is not null");
+            Assert.That(result?.StatusCode == 400, "Invalid request");
         }
 
+        [Test]
         public async Task GetBalanceByUsername_Message_If_User_Does_Not_Exist()
         {
             //Arrange
-            string accountToGet = "NOTEXIST";
+            string accountToGet = "NOTEXISTUSER";
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "NOTEXIST",
+                Amount = 0.0
+            };
             var mockService = new Mock<IAccountsService>();
             mockService
                 .Setup(m => m.GetBalanceByUsername(accountToGet))
-                .ReturnAsync(null);
+                .Throws(new AccountNotExistsException());
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.GetBalanceByUsername(accountToGet);
+            var response = await _controller.GetBalanceByUsername(accountToGet);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.OK, "Account retrieved");
-            Assert.That(result.Value.Username == "User does not exist");
+            Assert.That(result != null, "Balance response is not null");
+            Assert.That(result?.StatusCode == 200, "Account retrieved");
+            Assert.That(value?.Username == "NOTEXIST");
+        }
+
+        [Test]
+        public async Task GetBalanceByUsername_Message_If_Error_Occurs()
+        {
+            //Arrange
+            string accountToGet = "ERROR";
+            string errorMessage = "An Error Has Occured";
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = errorMessage,
+                Amount = 0.0
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.GetBalanceByUsername(accountToGet))
+                .Throws(new Exception(errorMessage));
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var response = await _controller.GetBalanceByUsername(accountToGet);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
+
+            //Assert
+            Assert.That(result != null, "Balance response is not null");
+            Assert.That(result?.StatusCode == 422, "Account get error");
+            Assert.That(value?.Username == errorMessage);
         }
     }
 
@@ -206,78 +258,138 @@ namespace microPay.Accounts.Tests
         }
 
         [Test]
-        public async Task Deposit_True_On_Success()
+        public async Task Deposit_On_Success()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            var accountToGet = "USER";
+            AccountAmount accChangeRequest = new AccountAmount()
             {
-                Username = "USER",
+                Username = accountToGet,
+                Amount = 5.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "Success",
                 Amount = 5.0
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Deposit(accChangeRequest))
-                .ReturnAsync(true);
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Deposit(accChangeRequest);
+            var response = await _controller.Deposit(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.OK, "Deposit successful");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "Success");
+            Assert.That(result != null, "Deposit response is not null");
+            Assert.That(result?.StatusCode == 200, "Deposit successful");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("Success"), "Deposit correct");
+            Assert.That(value?.Amount, Is.EqualTo(5.0), "Deposit correct");
         }
 
+        [Test]
+        public async Task Deposit_On_User_Not_Exist()
+        {
+            //Arrange
+            var accountToGet = "USER";
+            AccountAmount accChangeRequest = new AccountAmount()
+            {
+                Username = accountToGet,
+                Amount = 5.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "",
+                Amount = 5.0
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .Throws(new AccountNotExistsException());
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var response = await _controller.Deposit(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
+
+            //Assert
+            Assert.That(result != null, "Deposit response is not null");
+            Assert.That(result?.StatusCode == 200, "Deposit successful");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("NOTEXIST"), "Deposit correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Deposit correct");
+        }
 
         [Test]
         public async Task Deposit_Should_Return_400_On_Invalid_Input()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = "",
-                Amount = "NAN"
+                Amount = 0.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "",
+                Amount = 0.0
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Deposit(accChangeRequest))
-                .ReturnAsync(false);
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Deposit(accChangeRequest);
+            var response = await _controller.Deposit(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Deposit failed - Error in request");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "Invalid Input");
+            Assert.That(result != null, "Deposit response is not null");
+            Assert.That(result?.StatusCode == 400, "Deposit failed - Error in request");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("Deposit failed - Error in request"), "Deposit correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Deposit correct");
         }
 
-        public async Task Deposit_False_On_Fail()
+        [Test]
+        public async Task Deposit_Message_On_Fail()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            String errorMessage = "An Error Occurred";
+            AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = "USER",
                 Amount = 5.0
             };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "USER",
+                Amount = 0.0
+            };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Deposit(accChangeRequest))
-                .ReturnAsync(false);
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .Throws(new Exception(errorMessage));
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Deposit(accChangeRequest);
+            var response = await _controller.Deposit(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.UnprocessableContent, "Deposit fail results in code 422");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "An error occurred during withdraw");
+            Assert.That(result != null, "Deposit response is not null");
+            Assert.That(result?.StatusCode == 422, "Deposit fail results in code 422");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo(errorMessage), "Deposit correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Deposit correct");
         }
     }
 
@@ -295,25 +407,34 @@ namespace microPay.Accounts.Tests
         public async Task Withdraw_Message_On_Success()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            var accountToGet = "USER";
+            AccountAmount accChangeRequest = new AccountAmount()
             {
-                Username = "USER",
+                Username = accountToGet,
+                Amount = 5.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "Success",
                 Amount = 5.0
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Withdraw(accChangeRequest))
-                .ReturnAsync(true);
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Withdraw(accChangeRequest);
+            var response = await _controller.Withdraw(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.OK, "Withdraw successful");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "Success");
+            Assert.That(result != null, "Withdraw response is not null");
+            Assert.That(result?.StatusCode == 200, "Withdraw successful");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("Success"), "Withdraw correct");
+            Assert.That(value?.Amount, Is.EqualTo(5.0), "Withdraw correct");
         }
 
 
@@ -321,73 +442,134 @@ namespace microPay.Accounts.Tests
         public async Task Withdraw_Should_Return_400_On_Invalid_Input()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = "",
-                Amount = "NAN"
+                Amount = 0.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "",
+                Amount = 0.0
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Withdraw(accChangeRequest))
-                .ReturnAsync(false);
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Withdraw(accChangeRequest);
+            var response = await _controller.Withdraw(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Withdraw failed - Error in request");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "Invalid Input");
+            Assert.That(result != null, "Withdraw response is not null");
+            Assert.That(result?.StatusCode == 400, "Withdraw failed - Error in request");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("Withdraw failed - Error in request"), "Withdraw correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Withdraw correct");
         }
 
+        [Test]
         public async Task Withdraw_Message_On_Fail()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            string errorMessage = "An Error occurred";
+            AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = "USER",
                 Amount = 5.0
             };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "USER",
+                Amount = 0.0
+            };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Withdraw(accChangeRequest))
-                .ReturnAsync(false);
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Throws(new Exception(errorMessage));
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Withdraw(accChangeRequest);
+            var response = await _controller.Withdraw(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.UnprocessableContent, "Withdraw fail results in code 422");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "An error occurred during withdraw");
+            Assert.That(result != null, "Withdraw response is not null");
+            Assert.That(result?.StatusCode == 422, "Withdraw fail results in code 422");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo(errorMessage), "Withdraw error message correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Withdraw correct");
         }
 
-        public async Task Withdraw_Message_And_400_On_Overdraft_Error()
+        [Test]
+        public async Task Withdraw_On_User_Not_Exist()
         {
             //Arrange
-            AccChangeRequest accChangeRequest = new AccChangeRequest()
+            var accountToGet = "USER";
+            AccountAmount accChangeRequest = new AccountAmount()
             {
-                Username = "USER",
+                Username = accountToGet,
+                Amount = 5.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "",
                 Amount = 5.0
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.Withdraw(accChangeRequest))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Throws(new AccountNotExistsException());
+            var _controller = new AccountsController(mockService.Object);
+
+            //Act
+            var response = await _controller.Withdraw(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
+
+            //Assert
+            Assert.That(result != null, "Deposit response is not null");
+            Assert.That(result?.StatusCode == 200, "Deposit successful");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("NOTEXIST"), "Deposit correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Deposit correct");
+        }
+
+        [Test]
+        public async Task Withdraw_Message_And_400_On_Overdraft_Error()
+        {
+            //Arrange
+            AccountAmount accChangeRequest = new AccountAmount()
+            {
+                Username = "USER",
+                Amount = 5.0
+            };
+            AccountAmount expectedResult = new AccountAmount()
+            {
+                Username = "USER",
+                Amount = 0.0
+            };
+            var mockService = new Mock<IAccountsService>();
+            mockService
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
                 .Throws(new AccountCannotOverdraftException());
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var result = await _controller.Withdraw(accChangeRequest);
+            var response = await _controller.Withdraw(accChangeRequest);
+            var result = response as ObjectResult;
+            var value = result?.Value as AccountAmount;
 
             //Assert
-            Assert.That(result != null, "Create response is not null");
-            Assert.That(result.StatusCode == HttpStatusCode.BadRequest, "Withdraw fail due to overdraft results in 400");
-            Assert.That(result.Value != null);
-            Assert.That(result.Value == "The Account is not allowed to overdraft");
+            Assert.That(result != null, "Withdraw response is not null");
+            Assert.That(result?.StatusCode == 400, "Withdraw fail due to overdraft results in 400");
+            Assert.That(value != null);
+            Assert.That(value?.Username, Is.EqualTo("Withdraw failed - Account not allowed overdraft"), "Withdraw correct");
+            Assert.That(value?.Amount, Is.EqualTo(0.0), "Withdraw correct");
         }
     }
 }
