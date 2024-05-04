@@ -41,6 +41,7 @@ namespace microPay.Accounts.Tests
             var result = response as ObjectResult;
 
             //Assert
+            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Once);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 201, "Account created status 201");
             Assert.That((bool?)(result?.Value), Is.EqualTo(true), "Account created");
@@ -68,6 +69,7 @@ namespace microPay.Accounts.Tests
             var result = response as ObjectResult;
 
             //Assert
+            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Once);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 422, "Account create fail results in code 422");
             Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
@@ -96,6 +98,7 @@ namespace microPay.Accounts.Tests
             var result = response as ObjectResult;
 
             //Assert
+            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Never);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 400, "Account create invalid input results in code 400");
             Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
@@ -123,6 +126,7 @@ namespace microPay.Accounts.Tests
             var result = response as ObjectResult;
 
             //Assert
+            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Once);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 409, "Account create user exists results in code 409");
             Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
@@ -160,6 +164,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.GetBalanceByUsername(accountToGet), Times.Once);
             Assert.That(result != null, "Balance response is not null");
             Assert.That(result?.StatusCode == 200, "Balance retrieved");
             Assert.That(value != null);
@@ -188,6 +193,7 @@ namespace microPay.Accounts.Tests
             var result = response as ObjectResult;
 
             //Assert
+            mockService.Verify(m => m.GetBalanceByUsername(accountToGet), Times.Never);
             Assert.That(result != null, "Balance response is not null");
             Assert.That(result?.StatusCode == 400, "Invalid request");
         }
@@ -214,6 +220,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.GetBalanceByUsername(accountToGet), Times.Once);
             Assert.That(result != null, "Balance response is not null");
             Assert.That(result?.StatusCode == 200, "Account retrieved");
             Assert.That(value?.Username == "NOTEXIST");
@@ -242,6 +249,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.GetBalanceByUsername(accountToGet), Times.Once);
             Assert.That(result != null, "Balance response is not null");
             Assert.That(result?.StatusCode == 422, "Account get error");
             Assert.That(value?.Username == errorMessage);
@@ -284,6 +292,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 200, "Deposit successful");
             Assert.That(value != null);
@@ -318,6 +327,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 200, "Deposit successful");
             Assert.That(value != null);
@@ -351,6 +361,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Never);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 400, "Deposit failed - Error in request");
             Assert.That(value != null);
@@ -385,6 +396,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 422, "Deposit fail results in code 422");
             Assert.That(value != null);
@@ -430,6 +442,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 200, "Withdraw successful");
             Assert.That(value != null);
@@ -464,6 +477,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Never);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 400, "Withdraw failed - Error in request");
             Assert.That(value != null);
@@ -498,6 +512,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 422, "Withdraw fail results in code 422");
             Assert.That(value != null);
@@ -532,6 +547,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 200, "Deposit successful");
             Assert.That(value != null);
@@ -565,6 +581,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 400, "Withdraw fail due to overdraft results in 400");
             Assert.That(value != null);
