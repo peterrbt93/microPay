@@ -26,9 +26,9 @@ public partial class TransactionsContext : DbContext
 
             entity.ToTable("transactions");
 
-            entity.Property(e => e.AccountId).HasMaxLength(45);
             entity.Property(e => e.Action).HasMaxLength(45);
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Username).HasMaxLength(45);
         });
 
         OnModelCreatingPartial(modelBuilder);
