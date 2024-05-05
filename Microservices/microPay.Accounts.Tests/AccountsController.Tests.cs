@@ -23,25 +23,27 @@ namespace microPay.Accounts.Tests
         public async Task CreateAccount_Should_Return_201_On_Success()
         {
             //Arrange
-            AccountDTO accountToCreate = new AccountDTO()
+            Account accountToCreate = new Account()
             {
                 Username = "UNITTEST",
                 Password = "password",
                 Balance = 2.0,
                 CanOverdraft = 1
             };
+            AccountDTO accountDTOToCreate = new AccountDTO(accountToCreate);
+
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.CreateAccount(accountToCreate))
+                .Setup(m => m.CreateAccount(accountDTOToCreate))
                 .ReturnsAsync(true);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var response = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountDTOToCreate);
             var result = response as ObjectResult;
 
             //Assert
-            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Once);
+            mockService.Verify(m => m.CreateAccount(accountDTOToCreate), Times.Once);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 201, "Account created status 201");
             Assert.That((bool?)(result?.Value), Is.EqualTo(true), "Account created");
@@ -51,25 +53,26 @@ namespace microPay.Accounts.Tests
         public async Task CreateAccount_Should_Return_422_On_Creation_Fail()
         {
             //Arrange
-            AccountDTO accountToCreate = new AccountDTO()
+            Account accountToCreate = new Account()
             {
                 Username = "UNITTEST",
                 Password = "password",
                 Balance = 2.0,
                 CanOverdraft = 1
             };
+            AccountDTO accountDTOToCreate = new AccountDTO(accountToCreate);
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.CreateAccount(accountToCreate))
+                .Setup(m => m.CreateAccount(accountDTOToCreate))
                 .ReturnsAsync(false);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var response = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountDTOToCreate);
             var result = response as ObjectResult;
 
             //Assert
-            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Once);
+            mockService.Verify(m => m.CreateAccount(accountDTOToCreate), Times.Once);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 422, "Account create fail results in code 422");
             Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
@@ -80,25 +83,26 @@ namespace microPay.Accounts.Tests
         public async Task CreateAccount_Should_Return_400_On_Invalid_Input()
         {
             //Arrange
-            AccountDTO accountToCreate = new AccountDTO()
+            Account accountToCreate = new Account()
             {
                 Username = "",
                 Password = "password",
-                Balance = 0.0,
+                Balance = 2.0,
                 CanOverdraft = 1
             };
+            AccountDTO accountDTOToCreate = new AccountDTO(accountToCreate);
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.CreateAccount(accountToCreate))
+                .Setup(m => m.CreateAccount(accountDTOToCreate))
                 .ReturnsAsync(false);
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var response = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountDTOToCreate);
             var result = response as ObjectResult;
 
             //Assert
-            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Never);
+            mockService.Verify(m => m.CreateAccount(accountDTOToCreate), Times.Never);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 400, "Account create invalid input results in code 400");
             Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");
@@ -108,25 +112,26 @@ namespace microPay.Accounts.Tests
         public async Task CreateAccount_Should_Return_409_When_Account_Already_Exists()
         {
             //Arrange
-            AccountDTO accountToCreate = new AccountDTO()
+            Account accountToCreate = new Account()
             {
                 Username = "EXISTS",
                 Password = "password",
-                Balance = 0.0,
-                CanOverdraft = 0
+                Balance = 2.0,
+                CanOverdraft = 1
             };
+            AccountDTO accountDTOToCreate = new AccountDTO(accountToCreate);
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.CreateAccount(accountToCreate))
+                .Setup(m => m.CreateAccount(accountDTOToCreate))
                 .Throws(new AccountAlreadyExistsException());
             var _controller = new AccountsController(mockService.Object);
 
             //Act
-            var response = await _controller.CreateAccount(accountToCreate);
+            var response = await _controller.CreateAccount(accountDTOToCreate);
             var result = response as ObjectResult;
 
             //Assert
-            mockService.Verify(m => m.CreateAccount(accountToCreate), Times.Once);
+            mockService.Verify(m => m.CreateAccount(accountDTOToCreate), Times.Once);
             Assert.That(result != null, "Create response is not null");
             Assert.That(result?.StatusCode == 409, "Account create user exists results in code 409");
             Assert.That((bool?)(result?.Value), Is.EqualTo(false), "Account create failed");

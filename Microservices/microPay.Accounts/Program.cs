@@ -19,7 +19,7 @@ builder.Services.AddEntityFrameworkMySQL().AddDbContext<AccountsContext>(options
         options.UseMySQL(constring);
     }
     
-});
+}, ServiceLifetime.Transient, ServiceLifetime.Transient);
 
 //Inject dependency for interface
 builder.Services.AddScoped<IAccountsService, AccountsService>();
