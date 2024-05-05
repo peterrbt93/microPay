@@ -15,22 +15,94 @@ namespace microPay.Accounts.Services
         }
         public async Task<bool> CreateAccount(AccountDTO accountToCreate)
         {
-            throw new NotImplementedException();
+            var entity = await accountsContext.Accounts.FirstOrDefaultAsync(s => s.Username == accountToCreate.Username);
+
+            if (entity != null)
+            {
+                throw new AccountAlreadyExistsException();
+            }
+
+            entity = new Account()
+            {
+                Username = accountToCreate.Username,
+                Password = accountToCreate.Password,
+                Balance = accountToCreate.Balance,
+                CreatedDate = DateTime.UtcNow,
+                CanOverdraft = accountToCreate.CanOverdraft
+            };
+            await accountsContext.Accounts.AddAsync(entity);
+            await accountsContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<AccountDTO> GetAccountByUsername(string username)
         {
-            throw new NotImplementedException();
+            var entity = await accountsContext.Accounts.FirstOrDefaultAsync(s => s.Username == username);
+
+            if (entity == null)
+            {
+                throw new AccountNotExistsException();
+            }
+
+            return new AccountDTO(entity);
         }
 
         public async Task<AccountAmount> GetBalanceByUsername(string username)
         {
-            throw new NotImplementedException();
+            var entity = await accountsContext.Accounts.FirstOrDefaultAsync(s => s.Username == username);
+
+            if (entity == null)
+            {
+                throw new AccountNotExistsException();
+            }
+
+            return new AccountAmount() { Username = entity.Username, Amount = entity.Balance };
         }
         public async Task<AccountAmount> DepositOrWithdraw(AccountAmount accChangeRequest, string type)
         {
-            throw new NotImplementedException();
-            //This method needs to call transactions microservice to create transactions table
+            var entity = await accountsContext.Accounts.FirstOrDefaultAsync(s => s.Username == accChangeRequest.Username);
+
+            if (entity == null)
+            {
+                throw new AccountNotExistsException();
+            }
+
+            bool callToTransactionAPISuccess = false;
+            try
+            {
+                //TODO: Call transactionsAPI to create record
+                callToTransactionAPISuccess = true;
+            } 
+            catch (Exception ex)
+            {
+                throw new Exception("Error calling transactionAPI: "+ ex.Message);
+            }
+
+            if (callToTransactionAPISuccess)
+            {
+                if (type == "DEPOSIT")
+                {
+                    entity.Balance += accChangeRequest.Amount;
+                } 
+                else if (type == "WITHDRAW")
+                {
+                    if (entity.CanOverdraft == 0 && entity.Balance - accChangeRequest.Amount < 0.0)
+                    {
+                        throw new AccountCannotOverdraftException();
+                    } 
+                    else
+                    {
+                        entity.Balance -= accChangeRequest.Amount;
+                    }
+                }
+                
+                await accountsContext.SaveChangesAsync();
+                return accChangeRequest;
+            } 
+            else
+            {
+                throw new Exception("Calling transactionAPI failed");
+            }
         }
     }
 }

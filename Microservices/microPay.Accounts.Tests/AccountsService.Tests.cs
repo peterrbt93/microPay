@@ -6,7 +6,6 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Net;
 using System.Security.Principal;
-using System.Xml;
 using static NUnit.Framework.Interfaces.TNode;
 
 namespace microPay.Accounts.Tests
@@ -262,19 +261,21 @@ namespace microPay.Accounts.Tests
         {
             //Arrange
             var accountToChange = "TOCHANGE";
+            double initAmount = 100.0;
+            double addAmount = 50.0;
 
             Account accountToCreate = new Account()
             {
                 Username = accountToChange,
                 Password = "password",
-                Balance = 100.0,
+                Balance = initAmount,
                 CanOverdraft = 1,
                 CreatedDate = DateTime.UtcNow
             };
             AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = accountToChange,
-                Amount = 50.0
+                Amount = addAmount
             };
             
             //Act
@@ -287,27 +288,29 @@ namespace microPay.Accounts.Tests
             //Assert
             Assert.That(change != null, "Deposit response is not null");
             Assert.That(accountAfterChange?.Username == accountToCreate.Username, "Deposit user is correct");
-            Assert.That(accountAfterChange?.Balance, Is.EqualTo(accountToCreate.Balance+change?.Amount), "Deposit correct");
+            Assert.That(accountAfterChange?.Balance, Is.EqualTo(initAmount+addAmount), "Deposit correct");
         }
 
         [Test]
         public async Task DepositOrWithdraw_On_Withdraw_Success()
         {
             //Arrange
-            var accountToChange = "TOCHANGE";
+            var accountToChange = "TOCHANGEWITHDRAW";
+            double initAmount = 100.0;
+            double withdrawAmount = 50.0;
 
             Account accountToCreate = new Account()
             {
                 Username = accountToChange,
                 Password = "password",
-                Balance = 100.0,
+                Balance = initAmount,
                 CanOverdraft = 1,
                 CreatedDate = DateTime.UtcNow
             };
             AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = accountToChange,
-                Amount = 50.0
+                Amount = withdrawAmount
             };
 
             //Act
@@ -320,7 +323,7 @@ namespace microPay.Accounts.Tests
             //Assert
             Assert.That(change != null, "Withdraw response is not null");
             Assert.That(accountAfterChange?.Username == accountToCreate.Username, "Withdraw user is correct");
-            Assert.That(accountAfterChange?.Balance, Is.EqualTo(accountToCreate.Balance - change?.Amount), "Withdraw correct");
+            Assert.That(accountAfterChange?.Balance, Is.EqualTo(initAmount - withdrawAmount), "Withdraw correct");
         }
 
         [Test]
@@ -345,20 +348,22 @@ namespace microPay.Accounts.Tests
         public async Task DepositOrWithdraw_On_Overdraft_Success()
         {
             //Arrange
-            var accountToChange = "TOCHANGE";
+            var accountToChange = "TOCHANGEOVERDRAFT";
+            double initAmount = 100.0;
+            double withdrawAmount = 150.0;
 
             Account accountToCreate = new Account()
             {
                 Username = accountToChange,
                 Password = "password",
-                Balance = 100.0,
+                Balance = initAmount,
                 CanOverdraft = 1,
                 CreatedDate = DateTime.UtcNow
             };
             AccountAmount accChangeRequest = new AccountAmount()
             {
                 Username = accountToChange,
-                Amount = 150.0
+                Amount = withdrawAmount
             };
 
             //Act
@@ -370,7 +375,7 @@ namespace microPay.Accounts.Tests
             //Assert
             Assert.That(change != null, "Withdraw response is not null");
             Assert.That(accountAfterChange?.Username == accountToCreate.Username, "Withdraw user is correct");
-            Assert.That(accountAfterChange?.Balance, Is.EqualTo(accountToCreate.Balance - change?.Amount), "Withdraw correct");
+            Assert.That(accountAfterChange?.Balance, Is.EqualTo(initAmount - withdrawAmount), "Withdraw correct");
 
         }
 
@@ -378,7 +383,7 @@ namespace microPay.Accounts.Tests
         public async Task DepositOrWithdraw_On_Overdraft_Error()
         {
             //Arrange
-            var accountToChange = "TOCHANGE";
+            var accountToChange = "TOCHANGEERROR";
 
             Account accountToCreate = new Account()
             {
