@@ -19,4 +19,6 @@ public class AccountDTO
         this.Balance = account.Balance;
         this.CanOverdraft = account.CanOverdraft;
     }
+
+    public AccountDTO() { }
 }

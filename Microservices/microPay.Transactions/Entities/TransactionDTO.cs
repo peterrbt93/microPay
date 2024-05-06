@@ -14,14 +14,4 @@ public class TransactionDTO
     public DateTime CreatedDate { get; set; }
 
     public double NewBalance { get; set; }
-
-    public TransactionDTO(Transaction t ) {
-        Action = t.Action;
-        Username = t.Username;
-        Amount = t.Amount;
-        CreatedDate = t.CreatedDate;
-        NewBalance = t.NewBalance;
-    }
-
-    public TransactionDTO() {}
 }
