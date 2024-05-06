@@ -1,17 +1,24 @@
 ﻿using microPay.Accounts.Entities;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI;
+using Newtonsoft.Json;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Security.Principal;
+using System.Text;
+using XSystem.Security.Cryptography;
 
 namespace microPay.Accounts.Services
 {
     public class AccountsService : IAccountsService
     {
         public AccountsContext accountsContext;
+        private readonly HttpClient client;
 
         public AccountsService(AccountsContext accountsContext)
         {
-            this.accountsContext = accountsContext;
+            this.accountsContext = accountsContext; 
+            this.client = new HttpClient() { BaseAddress = new Uri("https://localhost:3000")};
         }
         public async Task<bool> CreateAccount(AccountDTO accountToCreate)
         {
@@ -22,10 +29,14 @@ namespace microPay.Accounts.Services
                 throw new AccountAlreadyExistsException();
             }
 
+            var provider = new SHA1CryptoServiceProvider();
+            byte[] bytes = Encoding.UTF8.GetBytes(accountToCreate.Password);
+            string pwd = Convert.ToBase64String(provider.ComputeHash(bytes));
+
             entity = new Account()
             {
                 Username = accountToCreate.Username,
-                Password = accountToCreate.Password,
+                Password = pwd,
                 Balance = accountToCreate.Balance,
                 CreatedDate = DateTime.UtcNow,
                 CanOverdraft = accountToCreate.CanOverdraft
@@ -58,7 +69,7 @@ namespace microPay.Accounts.Services
 
             return new AccountAmount() { Username = entity.Username, Amount = entity.Balance };
         }
-        public async Task<AccountAmount> DepositOrWithdraw(AccountAmount accChangeRequest, string type)
+        public async Task<AccountAmount> DepositOrWithdraw(AccountAmount accChangeRequest, string type, bool withExternalCall = true)
         {
             var entity = await accountsContext.Accounts.FirstOrDefaultAsync(s => s.Username == accChangeRequest.Username);
 
@@ -67,42 +78,53 @@ namespace microPay.Accounts.Services
                 throw new AccountNotExistsException();
             }
 
-            bool callToTransactionAPISuccess = false;
-            try
+            if (type == "DEPOSIT")
             {
-                //TODO: Call transactionsAPI to create record
-                callToTransactionAPISuccess = true;
-            } 
-            catch (Exception ex)
+                entity.Balance += accChangeRequest.Amount;
+            }
+            else if (type == "WITHDRAW")
             {
-                throw new Exception("Error calling transactionAPI: "+ ex.Message);
+                if (entity.CanOverdraft == 0 && entity.Balance - accChangeRequest.Amount < 0.0)
+                {
+                    throw new AccountCannotOverdraftException();
+                }
+                else
+                {
+                    entity.Balance -= accChangeRequest.Amount;
+                }
             }
 
-            if (callToTransactionAPISuccess)
+            if (withExternalCall)
             {
-                if (type == "DEPOSIT")
+                CreateTransactionRequest data = new CreateTransactionRequest()
                 {
-                    entity.Balance += accChangeRequest.Amount;
-                } 
-                else if (type == "WITHDRAW")
+                    Username = entity.Username,
+                    Action = type,
+                    Amount = accChangeRequest.Amount,
+                    NewBalance = entity.Balance
+                };
+
+                var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var requestUri = "/Transactions/CreateTransaction";
+
+                try
                 {
-                    if (entity.CanOverdraft == 0 && entity.Balance - accChangeRequest.Amount < 0.0)
-                    {
-                        throw new AccountCannotOverdraftException();
-                    } 
-                    else
-                    {
-                        entity.Balance -= accChangeRequest.Amount;
-                    }
+                    var response = await client.PostAsync(requestUri, content);
+                    response.EnsureSuccessStatusCode();
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    bool success = JsonConvert.DeserializeObject<bool>(responseContent);
+                    if (!success) { throw new Exception($"Error while calling TransactionsAPI - returned false"); }
                 }
-                
-                await accountsContext.SaveChangesAsync();
-                return accChangeRequest;
-            } 
-            else
-            {
-                throw new Exception("Calling transactionAPI failed");
+                catch (HttpRequestException ex)
+                {
+                    throw new Exception($"Error while calling TransactionsAPI: {ex.Message}");
+                }
             }
+            
+            await accountsContext.SaveChangesAsync();
+
+            return accChangeRequest;
         }
     }
 }

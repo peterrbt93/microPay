@@ -287,7 +287,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true))
                 .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
@@ -297,7 +297,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 200, "Deposit successful");
             Assert.That(value != null);
@@ -322,7 +322,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true))
                 .Throws(new AccountNotExistsException());
             var _controller = new AccountsController(mockService.Object);
 
@@ -332,7 +332,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 200, "Deposit successful");
             Assert.That(value != null);
@@ -356,7 +356,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", false))
                 .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
@@ -366,7 +366,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Never);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", false), Times.Never);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 400, "Deposit failed - Error in request");
             Assert.That(value != null);
@@ -391,7 +391,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true))
                 .Throws(new Exception(errorMessage));
             var _controller = new AccountsController(mockService.Object);
 
@@ -401,7 +401,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 422, "Deposit fail results in code 422");
             Assert.That(value != null);
@@ -437,7 +437,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true))
                 .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
@@ -447,7 +447,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true), Times.Once);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 200, "Withdraw successful");
             Assert.That(value != null);
@@ -472,7 +472,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", false))
                 .ReturnsAsync(expectedResult);
             var _controller = new AccountsController(mockService.Object);
 
@@ -482,7 +482,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Never);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", false), Times.Never);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 400, "Withdraw failed - Error in request");
             Assert.That(value != null);
@@ -507,7 +507,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true))
                 .Throws(new Exception(errorMessage));
             var _controller = new AccountsController(mockService.Object);
 
@@ -517,7 +517,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true), Times.Once);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 422, "Withdraw fail results in code 422");
             Assert.That(value != null);
@@ -542,7 +542,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true))
                 .Throws(new AccountNotExistsException());
             var _controller = new AccountsController(mockService.Object);
 
@@ -552,7 +552,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true), Times.Once);
             Assert.That(result != null, "Deposit response is not null");
             Assert.That(result?.StatusCode == 200, "Deposit successful");
             Assert.That(value != null);
@@ -576,7 +576,7 @@ namespace microPay.Accounts.Tests
             };
             var mockService = new Mock<IAccountsService>();
             mockService
-                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"))
+                .Setup(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true))
                 .Throws(new AccountCannotOverdraftException());
             var _controller = new AccountsController(mockService.Object);
 
@@ -586,7 +586,7 @@ namespace microPay.Accounts.Tests
             var value = result?.Value as AccountAmount;
 
             //Assert
-            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW"), Times.Once);
+            mockService.Verify(m => m.DepositOrWithdraw(accChangeRequest, "WITHDRAW", true), Times.Once);
             Assert.That(result != null, "Withdraw response is not null");
             Assert.That(result?.StatusCode == 400, "Withdraw fail due to overdraft results in 400");
             Assert.That(value != null);

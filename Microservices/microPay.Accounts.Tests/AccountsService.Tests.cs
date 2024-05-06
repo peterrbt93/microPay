@@ -137,7 +137,6 @@ namespace microPay.Accounts.Tests
             //Assert
             Assert.That(result != null, "Get account response is not null");
             Assert.That(result?.Username, Is.EqualTo(accountToGet), "Account value correct");
-            Assert.That(result?.Password, Is.EqualTo(accountToCreate.Password), "Account value correct");
             Assert.That(result?.Balance, Is.EqualTo(accountToCreate.Balance), "Account value correct");
             Assert.That(result?.CanOverdraft, Is.EqualTo(accountToCreate.CanOverdraft), "Account value correct");
         }
@@ -281,7 +280,7 @@ namespace microPay.Accounts.Tests
             //Act
             await _context.AddAsync(accountToCreate);
             await _context.SaveChangesAsync();
-            var change = await _service.DepositOrWithdraw(accChangeRequest, "DEPOSIT");
+            var change = await _service.DepositOrWithdraw(accChangeRequest, "DEPOSIT", false);
             var accountAfterChange = await _context.Accounts.FirstOrDefaultAsync(a => a.Username == accountToChange);
 
 
@@ -316,7 +315,7 @@ namespace microPay.Accounts.Tests
             //Act
             await _context.AddAsync(accountToCreate);
             await _context.SaveChangesAsync();
-            var change = await _service.DepositOrWithdraw(accChangeRequest, "WITHDRAW");
+            var change = await _service.DepositOrWithdraw(accChangeRequest, "WITHDRAW", false);
             var accountAfterChange = await _context.Accounts.FirstOrDefaultAsync(a => a.Username == accountToChange);
 
 
@@ -369,7 +368,7 @@ namespace microPay.Accounts.Tests
             //Act
             await _context.AddAsync(accountToCreate);
             await _context.SaveChangesAsync();
-            var change = await _service.DepositOrWithdraw(accChangeRequest, "WITHDRAW");
+            var change = await _service.DepositOrWithdraw(accChangeRequest, "WITHDRAW", false);
             var accountAfterChange = await _context.Accounts.FirstOrDefaultAsync(a => a.Username == accountToChange);
 
             //Assert

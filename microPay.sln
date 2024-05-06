@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Accounts", "Micros
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Transactions", "Microservices\microPay.Transactions\microPay.Transactions.csproj", "{41618F5E-B212-49A6-87F1-2622337DA9C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "microPay.Accounts.Tests", "Microservices\microPay.Accounts.Tests\microPay.Accounts.Tests.csproj", "{872341A0-A8E1-4A89-A363-EEFA83C4A931}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Accounts.Tests", "Microservices\microPay.Accounts.Tests\microPay.Accounts.Tests.csproj", "{872341A0-A8E1-4A89-A363-EEFA83C4A931}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "microPay.Transactions.Tests", "Microservices\microPay.Transactions.Tests\microPay.Transactions.Tests.csproj", "{B83FC376-50BC-41D6-940C-552F45C50A92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "microPay.Transactions.Tests", "Microservices\microPay.Transactions.Tests\microPay.Transactions.Tests.csproj", "{B83FC376-50BC-41D6-940C-552F45C50A92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

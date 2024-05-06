@@ -96,7 +96,7 @@ namespace microPay.Accounts.Controllers
 
             try
             {
-                response = await _accountsService.DepositOrWithdraw(accChangeRequest, "DEPOSIT");
+                response = await _accountsService.DepositOrWithdraw(accChangeRequest, "DEPOSIT", true);
             }
             catch (AccountNotExistsException)
             {

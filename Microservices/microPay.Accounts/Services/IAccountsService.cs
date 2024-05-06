@@ -7,6 +7,6 @@ namespace microPay.Accounts.Services
         public Task<AccountAmount> GetBalanceByUsername(string username);
         public Task<AccountDTO> GetAccountByUsername(string username);
         public Task<bool> CreateAccount(AccountDTO accountToCreate);
-        public Task<AccountAmount> DepositOrWithdraw(AccountAmount accChangeRequest, string type);
+        public Task<AccountAmount> DepositOrWithdraw(AccountAmount accChangeRequest, string type, bool withExternalCall = true);
     }
 }
